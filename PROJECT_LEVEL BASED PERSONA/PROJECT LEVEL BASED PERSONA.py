@@ -167,7 +167,7 @@ agg_df.loc[agg_df["customers_level_based"] == new_user]
 # 377     TUR    iOS      F   ...    41_75       TUR_IOS_F_41_75       D
 
 """ 
-As a result of the analysis, a female new user between the ages of 41-75  who uses an IOS device from Turkey, 
+As a result of the analysis, a new female user between the ages of 41-75 who uses an IOS device from Turkey, 
 belongs to the segment D.
 """
 
