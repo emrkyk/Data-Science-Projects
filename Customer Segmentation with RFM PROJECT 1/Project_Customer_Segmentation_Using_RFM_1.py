@@ -86,7 +86,7 @@ rfm = df.groupby('Customer ID').agg({'InvoiceDate': lambda date: (today_date - d
 
 rfm.columns = ['Recency', 'Frequency', 'Monetary']
 
-rfm = rfm[(rfm["Monetary"]) > 0 & (rfm["Frequency"] > 0)]
+rfm = rfm[(rfm["Monetary"] > 0) & (rfm["Frequency"] > 0)]
 rfm.head()
 
 #              Recency  Frequency  Monetary
