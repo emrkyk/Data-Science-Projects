@@ -2,14 +2,14 @@
 # CLTV Customer Lifetime Value Calculation Project
 ##################################################
 
-# ⭐⭐⭐
-# CLTV = (Customer_Value / Churn_Rate) x Profit_margin  ⭐⭐⭐
+# ⭐
+# CLTV = (Customer_Value / Churn_Rate) x Profit_margin 
 # Customer_Value = Average_Order_Value * Purchase_Frequency
 # Average_Order_Value = Total_Revenue / Total_Number_of_Orders
 # Purchase_Frequency =  Total_Number_of_Orders / Total_Number_of_Customers
 # Churn_Rate = 1 - Repeat_Rate
 # Profit_margin
-# ⭐⭐⭐
+# ⭐
 
 # DATASET:   https://archive.ics.uci.edu/ml/datasets/Online+Retail+II
 # Online Retail II dataset includes the sales of a UK-based online retail store between 01/12/2009 - 09/12/2011.
@@ -132,8 +132,8 @@ cltv_df["SCALED_CLTV"] = scaler.transform(cltv_df[["CLTV"]])
 
 cltv_df.sort_values("CLTV", ascending=False)
 
-cltv_df[["total_transaction", "total_unit", "total_price", "CLTV", "SCALED_CLTV"]].sort_values(by="SCALED_CLTV",
-                                                                                               ascending=False).head()
+cltv_df[["total_transaction", "total_unit", "total_price", "CLTV", "SCALED_CLTV"]].sort_values(by="SCALED_CLTV", ascending=False).head()
+
 #               SCALED_CLTV
 # Customer ID
 # 18102.00      100.00
@@ -146,8 +146,7 @@ cltv_df.sort_values("total_price", ascending=False)
 
 cltv_df["segment"] = pd.qcut(cltv_df["SCALED_CLTV"], 4, labels=["D", "C", "B", "A"])
 
-cltv_df.groupby("segment")[["total_transaction", "total_unit", "total_price", "CLTV", "SCALED_CLTV"]].agg(
-    {"count", "mean", "sum"})
+cltv_df.groupby("segment")[["total_transaction", "total_unit", "total_price", "CLTV", "SCALED_CLTV"]].agg({"count", "mean", "sum"})
 
 #                         total_transaction          total_unit                total_price
 #                      mean count     sum       mean    count     sum        mean   count     sum
@@ -167,10 +166,10 @@ cltv_df.groupby("segment")[["total_transaction", "total_unit", "total_price", "C
 
 
 
-# Let's observe the 5 MOST valuable customers!
+#⭐Let's observe the 5 MOST valuable customers!
 
 cltv_df[["segment", "total_transaction", "total_unit", "total_price", "CLTV", "SCALED_CLTV"]].sort_values(
-    by="SCALED_CLTV", ascending=False).head(10)
+    by="SCALED_CLTV", ascending=False).head(5)
 
 #               segment  total_transaction  total_unit   total_price       CLTV          SCALED_CLTV
 # Customer ID
