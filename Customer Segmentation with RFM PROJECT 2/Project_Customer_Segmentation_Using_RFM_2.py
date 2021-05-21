@@ -185,7 +185,7 @@ loyal_customers.to_csv("Loyal_Customers.csv")
 
 # FINAL EVALUATION
 
-"""    ⭐⭐⭐    ⭐⭐⭐     ⭐⭐⭐     ⭐⭐⭐          
+"""    ⭐⭐⭐          
 When customers were segmented into groups with RFM analysis, There are labelled segments that reflect the customers' 
 RFM behaviours. Among these segments, "champions", "need-attention" and "at-risk" groups were selected.
 
@@ -193,22 +193,19 @@ MARKETING!
 Since acquiring new customers is more costly than retaining existing customers, the main goal is to retain existing 
 customers with actions towards pleasing customers by getting to know them better.
 
-⭐⭐⭐  ⭐⭐⭐  ⭐⭐⭐  ⭐⭐⭐
-Need-Attention Segment: 
+⭐Need-Attention Segment: 
 The Need Attention group is a group that requires attention. The purchasing frequency of 
 customers in this segment is low, but the time that has passed since their shopping time is closer to the "At-Risk" 
 group. Customers in this customer segment can go either side, positive or negative. For this reason, action must be 
 taken to include them in the loyal customer's segmentation. For this reason, actions such as making special campaigns 
 for this customer group, offering special discounts via e-mails and messages, sending gifts or trial products can be taken.
 
-⭐⭐⭐  ⭐⭐⭐  ⭐⭐⭐  ⭐⭐⭐
-Champions Segment: 
+⭐Champions Segment: 
 Customers in this group have a high shopping frequency and spending. For this reason, retaining these
 customers is crucial. By taking actions such as special discounts, special customer cards for this segment, it can be
 aimed to retain these customers and to direct other customers to the company.
 
-⭐⭐⭐  ⭐⭐⭐  ⭐⭐⭐  ⭐⭐⭐
-At-risk Segment: 
+⭐At-risk Segment: 
 Customers in this segment seem to be at risk of losing. Shopping frequency is high, but the time 
 elapsed after the shopping date is long. Actions such as making special discounts for these customers, communicating
 by phone or email, gifting cards that earn points for customer spending can be applied.
