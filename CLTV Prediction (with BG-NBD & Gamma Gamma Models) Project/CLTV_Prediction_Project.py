@@ -2,12 +2,19 @@
 #   CLTV PREDICTION PROJECT  (using BG/NBD & GAMMA-GAMMA MODEL)
 # ##################################################################
 
-#  CLTV Prediction in 4 steps
+# ⭐ CLTV Prediction in 4 steps  
 # 1. Data Preparation
 # 2. Calculating the Expected Sale Forecasting with BG/NBD Model.
 # 3. Calculating the Expected Average Profit with Gamma-Gamma Model.
 # 4. Calculating the CLTV for a specific time period with BG/NBD and Gamma-Gamma models.
 
+
+⭐ # BG/NBD (BETA GEOMETRIC NEGATIVE BINOMIAL DISTRIBUTION) ⇒ (EXPECTED SALES FORECASTING: predicts how many purchases customers can make in a given time period)
+ # BG/NBD Model stochastic model learns the distribution of customers' purchase behaviour structure. Thereby, it enables to predict the expected number of sales 
+ # by taking into account both the overall distribution and an individual's own purchasing behaviour. Model executes probability distribution by taking into consideration
+ # all customers' purchase frequency. Model learns a pattern of customers' purchase frequency and predict.
+    
+⭐ # Gamma gamma model => Expected Average Profit
 
 # DATASET:   https://archive.ics.uci.edu/ml/datasets/Online+Retail+II
 # Online Retail II dataset includes the sales of a UK-based online retail store between the years 2010 - 2011.
@@ -24,7 +31,7 @@ pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
 pd.set_option('display.float_format', lambda x: '%.5f' % x)
 
-
+# Detecting Outliers (In literature, quantiles are usually used with 0.25 & 0.75) I used 0.01 & 0.99 in order to trim outliers (below) by replacing them with up_limit)
 def outlier_thresholds(dataframe, variable):
     quartile1 = dataframe[variable].quantile(0.01)
     quartile3 = dataframe[variable].quantile(0.99)
@@ -58,10 +65,10 @@ df.describe().T
 # =============
 
 df.dropna(inplace=True)
-df = df.loc[~df["Invoice"].str.contains("C", na=False)]
+df = df.loc[~df["Invoice"].str.contains("C", na=False)]                # removing returned products
 df = df[df["Quantity"] > 0]
 
-replace_with_thresholds(df, "Quantity")          # Outliers in Quantity and Price trimmed! (replaced with up_limit)
+replace_with_thresholds(df, "Quantity")                                # Outliers in Quantity and Price trimmed! (replaced with up_limit)
 replace_with_thresholds(df, "Price")
 df.describe().T
 #                 count        mean       std        min         25%       50%           75%           max
@@ -214,7 +221,7 @@ rfm_cltv.head()
 rfm_cltv.sort_values("expected_number_of_purchases", ascending=False).head(10)
 
 # ==================================================================================
-# What are the 10 customers to be expected to make the purchase the most in 1 month?
+# ⭐ What are the 10 customers to be expected to make the purchase the most in 1 month?
 # ==================================================================================
 
 bgf.predict(4,
@@ -243,7 +250,7 @@ rfm_cltv["expected_number_of_purchases"] = bgf.predict(4,
 rfm_cltv.head()
 rfm_cltv.sort_values("expected_number_of_purchases", ascending=False).head(20)
 
-""" What makes BG/NBD MODEL and CLTV very valuable is that they provide predictively valuable information about 
+⭐""" What makes BG/NBD MODEL and CLTV very valuable is that they provide predictively valuable information about 
 new customers although new customers' purchasing patterns are not yet known.
 Model investigated the purchasing patterns of all past customers and estimated that the customers with
  high recency and high purchasing frequency and high monetary as high potential customers."""
@@ -291,7 +298,7 @@ ggf.fit(rfm_cltv["Frequency"], rfm_cltv["monetary_avg"])
 
 
 # =============================================
-# 10 most expected average profitable customers
+# ⭐ 10 most expected average profitable customers 
 # =============================================
 ggf.conditional_expected_average_profit(rfm_cltv["Frequency"],
                                         rfm_cltv["monetary_avg"]).sort_values(ascending=False).head(10)
@@ -333,7 +340,7 @@ cltv.shape
 cltv = cltv.reset_index()
 cltv.sort_values(by="clv", ascending=False).head(10)
 
-# 10 Most Valuable Customers!
+# ⭐ 10 Most Valuable Customers! 
 
 #       Customer ID         clv
 # 2678        16000    11794.07113
