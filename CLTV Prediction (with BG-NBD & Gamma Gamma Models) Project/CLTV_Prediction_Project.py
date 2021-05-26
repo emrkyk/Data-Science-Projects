@@ -335,8 +335,7 @@ cltv = ggf.customer_lifetime_value(bgf,
                                    freq="W",  # weekly frequency
                                    discount_rate=0.01)
 
-cltv.columns  # Index(['Customer ID', 'clv'], dtype='object')
-cltv.shape
+cltv.shape       # (4338,)
 cltv = cltv.reset_index()
 cltv.sort_values(by="clv", ascending=False).head(10)
 
@@ -354,6 +353,8 @@ cltv.sort_values(by="clv", ascending=False).head(10)
 # 3216        16737      530.40716
 # 1310        14126      496.62311
 
+cltv_50 = cltv.sort_values(by="clv", ascending=False).head(50)
+cltv_50.to_csv("Cltv_50_most_valuable_customers.csv")
 
 # VALIDATION!!!
 
