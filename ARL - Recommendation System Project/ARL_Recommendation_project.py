@@ -417,8 +417,9 @@ cltv_p[(cltv_p.index.isin(germany_ids)) & (cltv_p["cltv_p_segment"] == "B")]
 cltv_p.loc[(cltv_p.index.isin(germany_ids)) & (cltv_p["cltv_p_segment"] == "C"), "recommended_product"] = product_c
 cltv_p[(cltv_p.index.isin(germany_ids)) & (cltv_p["cltv_p_segment"] == "C")]
 
-
-
+""" What was the main goal? =>>    Recommends product A  ===> customers in segment A
+                                   Recommends product B  ===> customers in segment B
+                                   Recommends product C  ===> customers in segment C """
 
 
 # ⭐ LET'S TRY!
@@ -445,3 +446,5 @@ cltv_p[cltv_p.index == 12708]     # => SEGMENT B
 #              expected_average_profit         cltv_p          cltv_p_segment      recommended_product
 # Customer ID
 # 12708.0                 276.461302          2.127007              B                 20719
+
+
