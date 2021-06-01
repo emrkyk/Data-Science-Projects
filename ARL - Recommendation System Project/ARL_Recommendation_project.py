@@ -1,6 +1,6 @@
-# ======================================
+# =======================================
 #  ARL RECOMMENDATION PROJECT
-# ======================================
+# =======================================
 
 """⭐ CUSTOMIZED RECOMMENDATION SYSTEM => Segment-specific customized Association Rule Learning (using Apriori Algorithm) and make product recommendations.
 Using ARL, generate association rules for locations & segments and make recommendations according to these rules. 
