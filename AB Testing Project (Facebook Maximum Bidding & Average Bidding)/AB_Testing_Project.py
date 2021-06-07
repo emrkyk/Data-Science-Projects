@@ -1,23 +1,23 @@
 ###############################################################
-#   A/B TESTING PROJECT  ( AVERAGE BIDDING & MAXIMUM BIDDING)
+#  A/B TESTING PROJECT  ( AVERAGE BIDDING & MAXIMUM BIDDING)  #
 ###############################################################
 """
-  *** BUSINESS PROBLEM ***
-- Facebook recently introduced a new type of bidding named "Average Bidding," as an alternative to the existing bidding system
-  called "Maximum Bidding".
+ ⭐*** BUSINESS PROBLEM ***
+- Facebook has recently introduced a new type of bidding named "Average Bidding," as an alternative to the existing bidding
+  system called "Maximum Bidding".
 - Untitled_Company.com has decided to test this new feature. The company aims to measure whether the new bid type
   "Average Bidding" yields better results than current bid type "Maximum Bidding" using A/B testing.
 
-- Research Question: Is "Average Bidding" different/ better than "Maximum Bidding"?
+-⭐Research Question: Is "Average Bidding" different/ better than "Maximum Bidding"?
 
 - "Untitled_Company.com" company's target audience has been randomly divided into two groups of equal size.
   Control Group : Maximum Bidding Version.
   Test Group: Average Bidding Version
 
 - The ultimate measure of success for "Untitled_Company.com" company is "Purchase" metric.
-- So, Mainly focused on the "Purchase" metric for statistical testing first,
-- Later, out of curiosity, I also created a new variable for "Conversation Rate" and did research on and conducted related tests for "Earning" and  "Conversation Rate" 
-  metrics and came up with interesting results!
+- So, mainly focused on the "Purchase" metric for statistical testing first,
+- Later, out of curiosity, I also created a new variable for "Conversation Rate" and did research on and conducted tests for
+  "Earning" and  "Conversation Rate" metrics and came up with interesting results!
 - You can find the presentation in the repository.
   """
 
@@ -96,7 +96,7 @@ check_df(test_group)
 # Earning     1939.61  2080.98   2544.67   2931.31   3091.94   3171.49
 
 
-# Confidence Intervals for Purchase Variable (%95)
+# Confidence Intervals for Purchase Variable (% 95)
 sms.DescrStatsW(control_group["Purchase"]).tconfint_mean()
 # (508.0041754264924, 593.7839421139709)
 
@@ -130,11 +130,14 @@ AB_purchase.mean()
 # Control_Purchase   550.89
 # Test_Purchase      582.11
 
+AB_purchase.median()
+
+
 sns.kdeplot(data=AB_purchase, shade=True)
 plt.show()
 
 #######################################################################
-#        DEFINING A/B TESTING FUNCTIONS AND IMPLEMENTATION            #
+#⭐       DEFINING A/B TESTING FUNCTIONS AND IMPLEMENTATION            #
 #######################################################################
 
 # Since I aim to conduct the tests multiple times, I've created functions.
@@ -151,7 +154,7 @@ plt.show()
 # --------------------------------
 """ It is necessary to test whether the distribution of a variable is the same as the theoretical normal distribution.
     The Shapiro-Wilk test is conducted to examine if the variable has normal distribution.
-    
+
     Hypothesis 
     H0: The assumption of the normality is provided.
     H1: The assumption of the normality is NOT provided. 
@@ -226,14 +229,16 @@ testing_variance_homogeneity(control_group["Purchase"], test_group["Purchase"])
 
 """ The parametric test(A/B Testing-Independent two-sample t-test)  will be applied since two assumptions are 
     ensured beforehand.
-    
+    Control Group : Maximum Bidding Version
+    Test Group: Average Bidding Version
+
     # control_group["Purchase"].mean() => 550.89
     # test_group["Purchase"].mean()   =>  582.11
 
     HYPOTHESES
-    # H0: M1 = M2 (There is no statistically significant difference between the Purchase means of the Control 
+    # H0: M1 = M2 (There is no statistically significant difference between the means of 'Purchase' of the Control 
                    and Test Groups.
-    # H1: M1 != M2 (There is a statistically significant difference between the Purchase means of the Control
+    # H1: M1 != M2 (There is a statistically significant difference between the means of 'Purchase' of the Control
                    and Test Groups.
     """
 
@@ -256,9 +261,9 @@ ab_testing(control_group["Purchase"], test_group["Purchase"])
 
 """ SUMMARY: 
     When evaluated statistically according to the Purchase variable, there is no statistically significant 
-    difference  between the means of Purchase in the Control and Test Groups. 
-    All in all, it turns out that there is no statistically significant difference between the maximum bidding 
-    version(control) and averaged bidding version(test) with % 95 confidence in terms of Purchase variable"""
+    difference  between the means of 'Purchase' of the Control and Test Groups. 
+    All in all, it turns out that there is no statistically significant difference between the Maximum Bidding 
+    and Average Bidding system with % 95 confidence in terms of Purchase variable"""
 
 
 # I also defined the MannWhitnetU test function just in case, I might need later.
@@ -302,17 +307,26 @@ AB_earning.mean()
 # Control_Earning   1908.57
 # Test_Earning      2514.89
 
+AB_earning.median()
+
 sns.kdeplot(data=AB_earning, shade=True)
 plt.show()
+
+sms.DescrStatsW(control_group["Earning"]).tconfint_mean()
+
+sms.DescrStatsW(test_group["Earning"]).tconfint_mean()
+
+
 
 # ========================================
 # AB TESTING FOR EARNING
 # ========================================
 """  HYPOTHESES
-    # H0: M1 = M2   (There is no statistically significant difference between the means of Earning variable in 
-                    the Control and Test Groups)
-    # H1: M1 != M2  (There is a statistically significant difference between the means of Earning variable in 
+    # H0: M1 = M2   (There is no statistically significant difference between the means of 'Earning' variable of 
+                     the Control and Test Groups)
+    # H1: M1 != M2  (There is a statistically significant difference between the means of 'Earning' variable of 
     #                the Control and Test Groups))"""
+
 # ------------------------------------------
 # 1.1 THE ASSUMPTION OF NORMALITY  (Earning)
 # ------------------------------------------
@@ -359,7 +373,6 @@ ab_testing(control_group["Earning"], test_group["Earning"])
 """Since p-value = 0.0000  < 0.05 ===>  H0 is rejected.
  There is a statistically significant difference between the means of Earning variable in the Control and Test Groups """
 
-
 # ===========================
 # SIMPLE FEATURE ENGINEERING
 # ===========================
@@ -386,15 +399,25 @@ test_group.head()
 # 4   145082.52 5201.39    749.86  2781.70            14.42
 
 
+control_group["Conversion Rate"].mean()
+# 11.59
+
+test_group["Conversion Rate"].mean()
+# 15.65
+
+control_group["Conversion Rate"].median()
+test_group["Conversion Rate"].median()
+
+
 # ========================================
 # AB TESTING FOR CONVERSION RATE
 # ========================================
 
 """  HYPOTHESES
-    # H0: M1 = M2   (There is no statistically significant difference between the means of "Conversion Rate" variable in 
-                    the Control and Test Groups)
-    # H1: M1 != M2  (There is a statistically significant difference between the means of "Conversion Rate" variable in 
-    #                the Control and Test Groups))"""
+    # H0: M1 = M2   (There is no statistically significant difference between the means of "Conversion Rate" variable of 
+                     the Control and Test Groups)
+    # H1: M1 != M2  (There is a statistically significant difference between the means of "Conversion Rate" variable of 
+    #                the Control and Test Groups) """
 
 # --------------------------------------------------
 # 1.1 THE ASSUMPTION OF NORMALITY  (Conversion Rate)
@@ -436,10 +459,10 @@ testing_variance_homogeneity(control_group["Conversion Rate"], test_group["Conve
 # -----------------------------------------------------
 
 """ HYPOTHESES
-    H0: M1 = M2   (There is no statistically significant difference between the means of "Conversion Rate" variable in 
+    H0: M1 = M2   (There is no statistically significant difference between the means of "Conversion Rate" variable of 
                     the Control and Test Groups)
-    H1: M1 != M2  (There is a statistically significant difference between the means of "Conversion Rate" variable in 
-                   the Control and Test Groups))"""
+    H1: M1 != M2  (There is a statistically significant difference between the means of "Conversion Rate" variable of 
+                   the Control and Test Groups)"""
 
 mann_whitney_u_test(control_group["Conversion Rate"], test_group["Conversion Rate"])
 # Test Statistic= 459.0000, p-value = 0.0005
@@ -448,26 +471,59 @@ mann_whitney_u_test(control_group["Conversion Rate"], test_group["Conversion Rat
     There is a statistically significant difference between the means of "Conversion Rate" variable in the Control and 
     Test Groups with 95 % confidence. Test group's Conversation Rate is higher than the control group."""
 
-
-
-
-
 ##############################################################
 #     -------    FINAL REMARKS       -------                #
 ##############################################################
 
+# Control Group: Maximum Bidding
+# Test Group: Average Bidding
+
 # 1. Purchase Variable
 """ There is no statistically significant difference between the maximum bidding 
     version(control) and averaged bidding version(test) with % 95 confidence in terms of Purchase variable"""
+# Mean ‘Purchase’ in control group:   550.89    (Maximum Bidding)
+# Mean ‘Purchase’ in test group:      582.11    (Average Bidding)
+
 
 # 2. Earning Variable
 """There is a statistically significant difference between the means of Earning variable in the Control and Test Groups"""
+# Mean ‘Earning’ in control group:   1908.57    (Maximum Bidding)
+# Mean ‘Earning’ in test group:      2514.89    (Average Bidding)
+
 
 # 3. Conversation Rate Variable
 """There is a statistically significant difference between the means of "Conversion Rate" variable in the Control and 
   Test Groups with 95 % confidence. Test group's Conversation Rate is higher than the control group."""
+# Mean ‘Conversion Rate’ in control group:   11.59  (Maximum Bidding)
+# Mean ‘Conversion Rate’ in test group:      15.65  (Average Bidding)
 
 
+""" CONCLUSION & RECOMMENDATIONS ⭐
+
+*** 'PURCHASE' EVALUATION METRIC: 
+
+    - Even though the mean of Purchase is higher in Average Bidding, it turned out that "there is no statistically significant 
+      difference between two bidding systems as the result of A/B testing. So, the current Maximum Bidding system can be continued
+      and long-term changes can be evaluated by increasing the number of observations (more than 40).
+    - Also, Since there is no significant difference between the two methods, customers can be asked which method they would prefer 
+      by conducting surveys.
+
+*** 'EARNING' EVALUATION METRIC:
+
+    - When focusing on the 'Earning' metric, as it is proven that  there is both mathematically and statistically significant 
+      difference between the means of Earning variable between both bidding system. Thus, the Average Bidding system ends up  
+      increasing the metric of 'Earning'. 
+      For this reason, from the point of 'Earning' metric, choosing Average Bidding method can be more profitable and beneficial 
+      for "Untitled_Company.com".
+
+*** 'CONVERSION RATE' EVALUATION METRIC:
+
+    - The initial version of the data did not contain 'Conversion Rate' variable, out of curiosity, I aimed to calculate and
+      investigate the possible impact of 'Conversion Rate'. {Conversion Rate = Purchase / Click}
+    - Results indicate that from the point of 'Conversion Rate', there is both mathematically and statistically significant 
+      difference between the means of 'Conversion Rate' variable between both bidding system. 'Average Bidding' system seems
+      to have higher 'Conversion Rate' than Maximum Bidding.
+"""
 
 
 
