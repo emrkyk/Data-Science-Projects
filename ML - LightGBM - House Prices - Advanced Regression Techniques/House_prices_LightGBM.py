@@ -4,8 +4,7 @@
 
 """ https://www.kaggle.com/c/house-prices-advanced-regression-techniques/overview
     Data Description file is available in the repository.
-    SalePrice is the target variable & 9 explanatory variables describing (almost) every aspect of residential homes
-    """
+    SalePrice is the target variable & 79 explanatory variables describing (almost) every aspect of residential homes"""
 # The functions I optimized such as check_df() in the Functional_EDA_Data_Prep repository
 
 import warnings
@@ -34,7 +33,7 @@ df = train.append(test).reset_index(drop=True)
 df.head()
 
 check_df(df)  # (2919, 81)               # 81 variable
-df.isnull().any().sum()  # 35 null values in total
+df.isnull().any().sum()                  # 35 null values in total
 
 #########################################
 #                EDA                    #
