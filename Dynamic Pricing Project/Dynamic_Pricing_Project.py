@@ -1,183 +1,228 @@
-# PRICING: Item fiyatı ne olmalı?
-
-"""Bir oyun şirketi bir oyununda kullanıcılarına item satın alımları için hediye paralar vermiştir.
-Kullanıcılar bu sanal paraları kullanarak karakterlerine çeşitli araçlar satın almaktadır.
-Oyun şirketi bir item için fiyat belirtmemiş ve kullanıcılardan bu item'ı istedikleri fiyattan almalarını sağlamış.
-Örneğin kalkan isimli item için kullanıcılar kendi uygun gördükleri miktarları ödeyerek bu kalkanı satın alacaklar.
-Örneğin bir kullanıcı kendisine verilen sanal paralardan 30 birim, diğer kullanıcı 45 birim ile ödeme yapabilir.
-Dolayısıyla kullanıcılar kendilerine göre ödemeyi göze aldıkları miktarlar ile bu item'ı satın alabilirler.."""
-
-# Çözülmesi gereken problemler:
-# Item'in fiyatı kategorilere göre farklılık göstermekte midir? İstatistiki olarak ifade ediniz.
-# İlk soruya bağlı olarak item'ın fiyatı ne olmalıdır? Nedenini açıklayınız?
-# Fiyat konusunda "hareket edebilir olmak" istenmektedir. Fiyat stratejisi için karar destek sistemi oluşturunuz.
-# Olası fiyat değişiklikleri için item satın almalarını ve gelirlerini simüle ediniz.
-
-import numpy as np
 import pandas as pd
+import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-from statsmodels.stats.proportion import proportions_ztest
-from scipy.stats import shapiro
-from scipy.stats.stats import pearsonr
-from scipy.stats import stats
+import pylab
 import statsmodels.stats.api as sms
-from scipy import stats
 import itertools
+from itertools import combinations
+from scipy.stats import shapiro, ttest_ind, mannwhitneyu, levene
+from scipy import stats
+from helpers.eda import *
+from helpers.data_prep import *
 
-data = pd.read_csv("Week_5/pricing.csv", sep=';')
-df = data.copy()
+
+
+pd.set_option("display.max_columns", None)
+
+df = pd.read_csv("Datasets/pricing.csv", sep=";")
 df.head()
 
-df.info()
-df.describe().T
+#    category_id      price
+# 0       489756  32.117753
+# 1       361254  30.711370
+# 2       361254  31.572607
+# 3       489756  34.543840
+# 4       489756  47.205824
 
-df["category_id"].unique()  # array([489756, 361254, 874521, 326584, 675201, 201436]
-df["category_id"].nunique()  # 6
 
-from dsmlbc4.helpers.eda import *
-from dsmlbc4.helpers.data_prep import *
-from dsmlbc4.helpers import *
-
-# OUTLIERS?
 check_df(df)
+df.info()
 
-outlier_thresholds(df, "price")  # (-64.46732638496243, 187.44554397493738)
+df["category_id"].value_counts()
+# 489756    1705
+# 874521     750
+# 361254     620
+# 326584     145
+# 675201     131
+# 201436      97
+
+
+# -------------------------
+#    OUTLIERS ?
+# -------------------------
+
+low_limit, up_limit = outlier_thresholds(df, "price")  # (-64.46732638496243, 187.44554397493738)
+
+check_outlier(df, "price")  # True   ---> There are outliers!
+
+outlier_index = grab_outliers(df, "price", index=True)
+#      category_id          price
+# 12        361254  201436.887637
+# 100       489756     441.638389
+# 234       489756  201436.957996
+# 289       361254  201436.427631
+# 314       874521     200.000000
 
 replace_with_thresholds(df, "price")
 
-df["category_id"].value_counts()
-df["category_id"].unique()
 df.groupby("category_id").agg({"price": ["mean", "median", "count", "nunique"]})
+#                  price
+#                   mean    median   count nunique
+# category_id
+# 201436       36.175498  33.534678    97      81
+# 326584       36.739739  31.748242   145      69
+# 361254       36.702812  34.459195   620     531
+# 489756       47.569117  35.635784  1705    1482
+# 675201       39.733698  33.835566   131     109
+# 874521       43.619565  34.400860   750     607
+
+df["category_id"].nunique()  # 6 unique
 
 
-# SORU!!!! Item'in fiyatı kategorilere göre farklılık göstermekte midir? İstatistiki olarak ifade ediniz. ???
+# QUESTION 1:  Does the price of the item differ according to the categories? Express it statistically?
+
+# A/B tests should be done between different categories. Assumptions (normality and homogeneity of variance) need to be
+# checked in order to decide whether to use parametric or nonparametric tests.
+
+# HYPOTHESES:
+# H0: There is no statistically significant difference between the categories
+# H1: There is  statistically significant difference between the categories
 
 
-# Farklı kategoriler arasında A/B testleri yapılmalıdır. Parametrik veya nonparametrik testlerinden hangisi olacağına karar
-# verebilmek  için varsayımların (normallik ve varyans homojenliği) kontrol edilmesi gerekmektedir.
+# --------------------
+# Normality Assumption
+# --------------------
+# H0 = Normality assumption is provided
+# H1 = Normality assumption is NOT provided
 
-# Hipotez:
-# H0: Kategoriler arasında anlamlı bir farklılık yoktur
-# H1: Kategoriler arasında anlamlı bir farklılık vardır
 
-# Normallik Varsayımı
-# H0 = Normal dagılım varsayımı saglanmaktadır.
-# H1 = Normal dagılım varsayımı saglanmamaktadır.
-
-# öncelikle normallik varsayımını kontrol edelim:
-# Normallik Varsayımı
-
-def normallik_kontrolü(i):
-    test_istatistigi, p_value = shapiro(df.loc[df["category_id"] == i, "price"])
-    print("Test İstatistiği= %.5f, p-value= %.5f" % (test_istatistigi, p_value))
+def normality_test(i):
+    test_stats, p_value = shapiro(df.loc[df["category_id"] == i, "price"])
+    print("Category ID: ", i, "-->" " Test Statistic= %.5f, p-value= %.5f" % (test_stats, p_value))
 
 
 for i in df["category_id"].unique():
-    normallik_kontrolü(i)
+    normality_test(i)
+# Category ID:  489756 --> Test Statistic= 0.55251, p-value= 0.00000
+# Category ID:  361254 --> Test Statistic= 0.30580, p-value= 0.00000
+# Category ID:  874521 --> Test Statistic= 0.45945, p-value= 0.00000
+# Category ID:  326584 --> Test Statistic= 0.39809, p-value= 0.00000
+# Category ID:  675201 --> Test Statistic= 0.41619, p-value= 0.00000
+# Category ID:  201436 --> Test Statistic= 0.61898, p-value= 0.00000
 
 
-# Test İstatistiği= 0.55251, p-value= 0.00000
-# Test İstatistiği= 0.30580, p-value= 0.00000
-# Test İstatistiği= 0.45945, p-value= 0.00000
-# Test İstatistiği= 0.39809, p-value= 0.00000
-# Test İstatistiği= 0.41619, p-value= 0.00000
-# Test İstatistiği= 0.61898, p-value= 0.00000
+"""All categories' p-values less than 0.05 ---> reject H0 hypothesis. Normality is not ensured.
+The Assumption of Normality is NOT provided in any of the above categories. 
+Therefore, a non-parametric test which is mannwhitneyu test should be applied.
+Since normality is not provided, no need to look at the homogeneity of variance."""
 
-# Tüm kategorilerin p-value degerleri 0.05 den küçük =>> reject Ho hypothesis. Normallik saglanmamaktadir.
-# Yukarıdaki kategorilerin hiçbirinde normallik varsayımı sağlanmamaktadır. Bu yüzden non-parametrik bir test olan
-# mannwhitneyu testi uygulanmalıdır.
-# Normallik sağlanmadığından Varyans homojenligine de bakmamiza gerek kalmamıştır.
+# --------------------
+# HYPOTHESES TESTING     NON-PARAMETRIC -----> MANNWHITNEYU
+# --------------------
+# HYPOTHESES:
+# H0: There is no statistically significant difference between the categories
+# H1: There is  statistically significant difference between the categories
+
+# FIRST, combinations of id's are derived:
+for hyp in list(itertools.combinations(df["category_id"].unique(), 2)):
+    print(hyp)
 
 
-# Hypothesis:
-# H0: Katogoriler arasında anlamlı bir farklılık yokur
-# H1: Katogoriler arasında anlamlı bir farklılık vardır
+# (489756, 361254)
+# (489756, 874521)
+# (489756, 326584)
+# (489756, 675201)
+# (489756, 201436)
+# (361254, 874521)
+# (361254, 326584)
+# (361254, 675201)
+# (361254, 201436)
+# (874521, 326584)
+# (874521, 675201)
+# (874521, 201436)
+# (326584, 675201)
+# (326584, 201436)
+# (675201, 201436)
 
-# Hipotez Testi
+
 def mann_whit_u(hypo):
-    test_istatistigi, pvalue = stats.mannwhitneyu(df.loc[df['category_id'] == hypo[0], 'price'],
-                                                  df.loc[df['category_id'] == hypo[1], 'price'])
+    test_stats, pvalue = stats.mannwhitneyu(df.loc[df["category_id"] == hypo[0], "price"],
+                                            df.loc[df["category_id"] == hypo[1], "price"])
     print(hypo)
-    print('Test İstatistiği = %.4f, p-value = %.4f' % (test_istatistigi, pvalue))
+    print('Test Statistic = %.4f, p-value = %.4f' % (test_stats, pvalue))
 
 
-for hypo in list(itertools.combinations(df['category_id'].unique(), 2)):
+for hypo in list(itertools.combinations(df["category_id"].unique(), 2)):
     mann_whit_u(hypo)
 
 # (489756, 361254)
-# Test İstatistiği = 380060.0000, p-value = 0.0000
-# H0 hipotezi reddedilir. İlgili iki kategori arasında anlamlı bir fark vardır.
+# Test Statistic = 380060.0000, p-value = 0.0000
+# H0 is REJECTED. There is a significant difference between the two related categories.
 
 # (489756, 874521)
-# Test İstatistiği = 519398.0000, p-value = 0.0000
-# H0 hipotezi reddedilir. İlgili iki kategori arasında anlamlı bir fark vardır.
+# Test Statistic = 519398.0000, p-value = 0.0000
+# H0 is REJECTED. There is a significant difference between the two related categories.
 
 # (489756, 326584)
-# Test İstatistiği = 69998.5000, p-value = 0.0000
-# H0 hipotezi reddedilir. İlgili iki kategori arasında anlamlı bir fark vardır.
+# Test Statistic = 69998.5000, p-value = 0.0000
+# H0 is REJECTED. There is a significant difference between the two related categories.
 
 # (489756, 675201)
-# Test İstatistiği = 86723.5000, p-value = 0.0000
-# H0 hipotezi reddedilir. İlgili iki kategori arasında anlamlı bir fark vardır.
+# Test Statistic = 86723.5000, p-value = 0.0000
+# H0 is REJECTED. There is a significant difference between the two related categories.
 
 # (489756, 201436)
-# Test İstatistiği = 60158.0000, p-value = 0.0000
-# H0 hipotezi reddedilir. İlgili iki kategori arasında anlamlı bir fark vardır.
+# Test Statistic = 60158.0000, p-value = 0.0000
+# H0 is REJECTED. There is a significant difference between the two related categories.
 
 # (361254, 874521)
-# Test İstatistiği = 218106.0000, p-value = 0.0241
-# H0 hipotezi reddedilir. İlgili iki kategori arasında anlamlı bir fark vardır.
+# Test Statistic = 218106.0000, p-value = 0.0241
+# H0 is REJECTED. There is a significant difference between the two related categories.
 
 # (361254, 326584)
-# Test İstatistiği = 33158.5000, p-value = 0.0000
-# H0 hipotezi reddedilir. İlgili iki kategori arasında anlamlı bir fark vardır.
+# Test Statistic = 33158.5000, p-value = 0.0000
+# H0 is REJECTED. There is a significant difference between the two related categories.
 
 # (361254, 675201)
-# Test İstatistiği = 39586.0000, p-value = 0.3249
-# H0 hipotezi REDDEDILEMEZ. İlgili iki kategori arasında anlamlı bir fark YOKTUR. p > 0.05
+# Test Statistic = 39586.0000, p-value = 0.3249
+# H0 CANNOT BE REJECTED. There is NO significant difference between the two related categories  p > 0.05
 
 # (361254, 201436)
-# Test İstatistiği = 30006.0000, p-value = 0.4866
-# H0 hipotezi REDDEDILEMEZ. İlgili iki kategori arasında anlamlı bir fark YOKTUR. p > 0.05
-
+# Test Statistic = 30006.0000, p-value = 0.4866
+# H0 CANNOT BE REJECTED. There is NO significant difference between the two related categories  p > 0.05
 
 # (874521, 326584)
-# Test İstatistiği = 38748.0000, p-value = 0.0000
-# H0 hipotezi reddedilir. İlgili iki kategori arasında anlamlı bir fark vardır.
+# Test Statistic = 38748.0000, p-value = 0.0000
+# H0 is REJECTED. There is a significant difference between the two related categories.
 
 # (874521, 675201)
-# Test İstatistiği = 47522.0000, p-value = 0.2752
-# H0 hipotezi REDDEDILEMEZ. İlgili iki kategori arasında anlamlı bir fark YOKTUR. p > 0.05
+# Test Statistic = 47522.0000, p-value = 0.2752
+# H0 CANNOT BE REJECTED. There is NO significant difference between the two related categories  p > 0.05
 
 # (874521, 201436)
-# Test İstatistiği = 34006.0000, p-value = 0.1478
-# H0 hipotezi REDDEDILEMEZ. İlgili iki kategori arasında anlamlı bir fark YOKTUR. p > 0.05
-
+# Test Statistic = 34006.0000, p-value = 0.1478
+# H0 CANNOT BE REJECTED. There is NO significant difference between the two related categories  p > 0.05
 
 # (326584, 675201)
-# Test İstatistiği = 6963.5000, p-value = 0.0001
-# H0 hipotezi reddedilir. İlgili iki kategori arasında anlamlı bir fark vardır.
-
+# Test Statistic = 6963.5000, p-value = 0.0001
+# H0 is REJECTED. There is a significant difference between the two related categories.
 
 # (326584, 201436)
-# Test İstatistiği = 5301.0000, p-value = 0.0005
-# H0 hipotezi reddedilir. İlgili iki kategori arasında anlamlı bir fark vardır.
+# Test Statistic = 5301.0000, p-value = 0.0005
+# H0 is REJECTED. There is a significant difference between the two related categories.
 
 # (675201, 201436)
-# Test İstatistiği = 6121.0000, p-value = 0.3185
-# H0 hipotezi REDDEDILEMEZ. İlgili iki kategori arasında anlamlı bir fark YOKTUR. p > 0.05
+# Test Statistic = 6121.0000, p-value = 0.3185
+# H0 CANNOT BE REJECTED. There is NO significant difference between the two related categories  p > 0.05
+
+
+# There is NO significant difference between the price of two related categories as follows:
+# (361254, 675201)
+# (361254, 201436)
+# (874521, 675201)
+# (874521, 201436)
+# (675201, 201436)
 
 
 # ========================================================================================
 
+# QUESTION2: Based on the first question, what should the price of the item be? Explain why?
 
-# SORU: İlk soruya bağlı olarak item'ın fiyatı ne olmalıdır? Nedenini açıklayınız?
-
-# Category Id fiyatlarının mean ve medyanlarina bakarak sabit bir fiyat belirlenebilir. Yukarıdaki testlerde,
-# itemlarin ortalamalari arasinda anlamli bir fark olmadıgı test etmiştik. Bu urunler arasinda istenilen herhangi
-# bir fiyat seçilebilir. (Ho hipotezi reddedilemezleri getirdik)
-
+# According to MannWhitney U test, results indicate that there is no significant difference between the means of
+# some items. A fixed price can be determined by looking at the mean and median of the Category Id & prices.
+# Any desired price can be selected among these products.
+# Combinations of items that there is no significant difference between the mean of items as follows : (H0 cannot be rejected)
 # (361254, 675201)
 # (361254, 201436)
 # (874521, 675201)
@@ -186,33 +231,37 @@ for hypo in list(itertools.combinations(df['category_id'].unique(), 2)):
 
 df.groupby('category_id').agg({'price': ['mean', 'median', "count"]})
 
+#                  price
+#                   mean     median count
+# category_id
+# 201436*      36.175498  33.534678    97
+# 326584       36.739739  31.748242   145
+# 361254*      36.702812  34.459195   620
+# 489756       47.569117  35.635784  1705
+# 675201*      39.733698  33.835566   131
+# 874521       43.619565  34.400860   750
+
+# Let's decide the mean of medians --->   33.93
 
 # ========================================================================================
 
+# QUESTION3: It is desired to be "movable- dynamic" in terms of price. Create a decision support system for
+# the price strategy.
 
-# SORU: Fiyat konusunda "hareket edebilir olmak" istenmektedir. Fiyat stratejisi için karar destek sistemi oluşturunuz.
+# Price flexibility can be created by focusing on 95% confidence intervals in Category Id items.
+# In addition, a wide scale can be selected by looking at the confidence intervals between those who do not have a
+# significant difference between each other's means.
 
-# Category Id itemlarda %95 lik güven aralıklarina odaklanarak fiyat esnekliği yaratılır.
-# Ayrıca birbirlerinin ortalamalari arasinda anlamli bir fark olmayanlar arasinda guven aralıklarına bakarak
-# genis bir skala seçilebilir.
+for i in df["category_id"].unique():
+    print('{0}: {1}'.format(i, sms.DescrStatsW(df.loc[df["category_id"] == i, "price"]).tconfint_mean()))
 
-for i in df['category_id'].unique():
-    print('{0}: {1}'.format(i, sms.DescrStatsW(df.loc[df['category_id'] == i, 'price']).tconfint_mean()))
-
-# 489756: (46.08434746302928, 49.05388670944087)
-# 361254: (35.42887870193408, 37.97674480809039)
-# 874521: (41.37178582892473, 45.86734400455721)
-# 326584: (33.88356818130745, 39.595908835042025)
-# 675201: (36.01515731082091, 43.45223940145658)
-# 201436: (34.381720084633564, 37.96927659690045)
+# 489756 price range for category decision-support system: (46.08434746302928, 49.05388670944087)
+# 361254 price range for category decision-support system: (35.42887870193408, 37.97674480809039)
+# 874521 price range for category decision-support system: (41.37178582892473, 45.86734400455721)
+# 326584 price range for category decision-support system: (33.88356818130745, 39.595908835042025)
+# 675201 price range for category decision-support system: (36.01515731082091, 43.45223940145658)
+# 201436 price range for category decision-support system: (34.381720084633564, 37.96927659690045)
 
 # ========================================================================================
 
-
-# SORU: Olası fiyat değişiklikleri için item satın almalarını ve gelirlerini simüle ediniz.
-
-df["price"].mean() # 43.68
-
-df.groupby('category_id').agg({'price': ['mean', 'count']})
-
-
+# QUESTION4 : Simulate item purchases and income for possible price changes (for each category)
