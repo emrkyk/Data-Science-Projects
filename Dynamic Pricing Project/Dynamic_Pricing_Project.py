@@ -1,3 +1,20 @@
+###############################
+# DYNAMIC PRICING PROJECT      ---> What should the item price be?
+###############################
+
+"""A game company gave gift coins to its users for item purchases in a game. Users buy various tools for their characters of game by using these virtual coins.
+   The game company did not specify a price for any item and allowed users to buy related item at the price they wanted. For example, for the item named shield, 
+   users can buy the shield by paying the amounts they are willing to pay. A user can pay with 30 units of the virtual money given to him/her, whereas other user 
+   with 45 units. Therefore, users can buy any item with the amounts they are willing to pay for themselves.
+
+    # Problems to be solved:
+    # Does the price of the item differ according to the categories? Express it statistically.
+    # What should the price of the item be based on the first question? Explain why?
+    # It is desired to be "movable" in terms of price. Create a decision support system for the price strategy.
+    # Simulate item purchases and income for possible price changes.
+"""
+
+
 import pandas as pd
 import numpy as np
 import seaborn as sns
