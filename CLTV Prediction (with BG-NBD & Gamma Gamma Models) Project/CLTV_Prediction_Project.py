@@ -360,3 +360,6 @@ cltv_100.to_csv("Cltv_100_most_valuable_customers.csv")
 
 rfm_cltv_final = rfm_cltv.merge(cltv, how="left", on="Customer ID")
 rfm_cltv_final.head()
+
+
+
