@@ -279,6 +279,6 @@ for i in df["category_id"].unique():
 # 675201 price range for category decision-support system: (36.01515731082091, 43.45223940145658)
 # 201436 price range for category decision-support system: (34.381720084633564, 37.96927659690045)
 
-# ========================================================================================
+# =========================================================================================
 
 # QUESTION4 : Simulate item purchases and income for possible price changes (for each category)
