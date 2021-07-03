@@ -1,6 +1,6 @@
-# ##################################################################
+# ###################################################################
 #   CLTV PREDICTION PROJECT 2 (with BG/NBD & GAMMA-GAMMA MODEL)
-# ##################################################################
+# ###################################################################
 
 # DATASET:   https://archive.ics.uci.edu/ml/datasets/Online+Retail+II
 # Online Retail II dataset includes the sales of a UK-based online retail store between the years 2010 - 2011.
